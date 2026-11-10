@@ -1,0 +1,56 @@
+{
+    "window": {
+        "screen_width": 1360,
+        "screen_height": 820,
+        "hud_width": 320,
+        "fps": 60,
+        "title": "Simulation Multi-Agents (Boids & DTN)"
+    },
+    "swarm": {
+        "num_agents": 50,
+        "agent_radius": 6.0,
+        "trail_length": 0,
+        "max_speed": 3.2,
+        "min_speed": 1.6,
+        "max_force": 0.14
+    },
+    "flocking_radii": {
+        "perception_radius": 68.0,
+        "separation_radius": 28.0,
+        "obstacle_detection_margin": 50.0,
+        "wall_margin": 55.0
+    },
+    "weights": {
+        "separation": 2.10,
+        "alignment": 1.05,
+        "cohesion": 0.85,
+        "obstacle_avoidance": 3.40,
+        "boundary": 2.50,
+        "wander": 0.20
+    },
+    "dtn_network": {
+        "comm_radius": 80.0,
+        "bandwidth_rate": 0.035,
+        "packet_spawn_interval": 5,
+        "require_line_of_sight": true
+    },
+    "colors": {
+        "background": [242, 242, 242],
+        "grid_line": [222, 222, 222],
+        "hud_background": [228, 228, 228],
+        "hud_border": [120, 120, 120],
+        "blue_node": [30, 100, 210],
+        "sync_node": [210, 40, 40],
+        "red_node": [210, 40, 40],
+        "obstacle_fill": [175, 175, 175],
+        "obstacle_ring": [70, 70, 70],
+        "accent": [30, 30, 30]
+    },
+    "initial_obstacles": [
+        {"x": 280, "y": 220, "radius": 50.0},
+        {"x": 740, "y": 210, "radius": 55.0},
+        {"x": 510, "y": 410, "radius": 65.0},
+        {"x": 270, "y": 610, "radius": 52.0},
+        {"x": 760, "y": 600, "radius": 48.0}
+    ]
+}

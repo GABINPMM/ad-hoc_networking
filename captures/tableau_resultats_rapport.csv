@@ -1,0 +1,5 @@
+Scenario,Time to 25%,Time to 50%,Time to 100% (Consensus),Average Node Degree <k>,Mean Connected Agents %,Final Propagation %
+"Scenario 1: Balanced Swarm (Default, R=80px)",9.70 s,9.77 s,16.17 s,10.05,98.1%,100.0%
+Scenario 2: High-Cohesion Flocking (R=80px),7.47 s,7.52 s,24.08 s,17.32,99.0%,100.0%
+"Scenario 3: Dispersed Exploration (Random Gas, R=80px)",5.95 s,6.98 s,10.27 s,1.82,81.3%,100.0%
+"Scenario 4: Short-Range DTN (R=52px, Store-Carry-Forward)",4.07 s,5.07 s,18.08 s,5.48,97.7%,100.0%
