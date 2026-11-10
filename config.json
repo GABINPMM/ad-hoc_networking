@@ -4,7 +4,7 @@
         "screen_height": 820,
         "hud_width": 320,
         "fps": 60,
-        "title": "Simulation Multi-Agents (Boids & DTN)"
+        "title": "Multi-Agent Simulation (Boids & DTN)"
     },
     "swarm": {
         "num_agents": 50,

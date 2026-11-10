@@ -1,8 +1,4 @@
-"""
-Point d'entrée principal de la simulation modulaire.
-Exécutez ce fichier via `lancer_simulation.bat` ou `python main.py`.
-"""
-
+# Main simulation engine and entry point
 from __future__ import annotations
 
 import csv
@@ -23,11 +19,6 @@ from spatial_grid import SpatialHashGrid
 
 
 class SimulationEngine:
-    """
-    Orchestrateur principal gérant le cycle de vie de la simulation,
-    les obstacles solides, l'essaim de 50 agents et le routage DTN.
-    """
-
     def __init__(self) -> None:
         pygame.init()
         pygame.display.set_caption(CONFIG.WINDOW_TITLE)
@@ -98,11 +89,9 @@ class SimulationEngine:
             )
 
     def _hot_reload_config(self) -> None:
-        """Recharge config.json en direct sans fermer la fenêtre."""
         old_num_agents = len(self.agents)
         if CONFIG.reload():
             pygame.display.set_caption(CONFIG.WINDOW_TITLE)
-            # Ajuster le nombre d'agents si modifié dans config.json
             if CONFIG.NUM_AGENTS > old_num_agents:
                 for idx in range(old_num_agents, CONFIG.NUM_AGENTS):
                     self.agents.append(
@@ -114,31 +103,29 @@ class SimulationEngine:
                     )
             elif CONFIG.NUM_AGENTS < old_num_agents:
                 self.agents = self.agents[: max(1, CONFIG.NUM_AGENTS)]
-            self.hud.notify("config.json rechargé avec succès !")
+            self.hud.notify("config.json reloaded successfully")
         else:
-            self.hud.notify("Erreur lors du rechargement de config.json")
+            self.hud.notify("Error reloading config.json")
 
     def _save_screenshot(self) -> None:
-        """Sauvegarde une capture d'écran HD dans le dossier captures/."""
         out_dir = Path(__file__).parent / "captures"
         out_dir.mkdir(exist_ok=True)
         stamp = time.strftime("%Y%m%d_%H%M%S")
-        filepath = out_dir / f"capture_essaim_{stamp}.png"
+        filepath = out_dir / f"screenshot_{stamp}.png"
         pygame.image.save(self.screen, str(filepath))
-        self.hud.notify(f"Capture enregistrée : captures/{filepath.name}")
+        self.hud.notify(f"Saved: captures/{filepath.name}")
 
     def _export_csv(self) -> None:
-        """Exporte l'historique de propagation et de connectivité en CSV."""
         out_dir = Path(__file__).parent / "captures"
         out_dir.mkdir(exist_ok=True)
         stamp = time.strftime("%Y%m%d_%H%M%S")
-        filepath = out_dir / f"telemetrie_dtn_{stamp}.csv"
+        filepath = out_dir / f"telemetry_{stamp}.csv"
         with open(filepath, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            writer.writerow(["echantillon", "propagation_pct", "connectivite_pct"])
+            writer.writerow(["sample", "propagation_pct", "connectivity_pct"])
             for idx, (prop_pct, conn_pct) in enumerate(self.hud.history):
                 writer.writerow([idx, f"{prop_pct:.2f}", f"{conn_pct:.2f}"])
-        self.hud.notify(f"CSV exporté : captures/{filepath.name}")
+        self.hud.notify(f"Exported: captures/{filepath.name}")
 
     def _handle_events(self) -> bool:
         for event in pygame.event.get():
@@ -153,7 +140,7 @@ class SimulationEngine:
                 elif event.key == pygame.K_r:
                     CONFIG.reload()
                     self._initialize_world()
-                    self.hud.notify("Simulation réinitialisée (Patient Zéro)")
+                    self.hud.notify("Simulation reset (Patient Zero seeded)")
                 elif event.key == pygame.K_c:
                     self._hot_reload_config()
                 elif event.key == pygame.K_s:
@@ -291,4 +278,3 @@ class SimulationEngine:
 if __name__ == "__main__":
     engine = SimulationEngine()
     engine.run()
-

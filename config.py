@@ -1,8 +1,4 @@
-"""
-Module de configuration dynamique (charge config.json s'il est présent).
-Appuyez sur [C] dans la simulation pour recharger config.json à chaud.
-"""
-
+# Configuration module
 from __future__ import annotations
 
 import json
@@ -16,34 +12,27 @@ CONFIG_FILE_PATH = Path(__file__).parent / "config.json"
 
 @dataclass
 class SimConfig:
-    """Configuration sobre et académique."""
-
-    # Fenêtre
     SCREEN_WIDTH: int = 1360
     SCREEN_HEIGHT: int = 820
     HUD_WIDTH: int = 320
     WORLD_WIDTH: int = 1040
     WORLD_HEIGHT: int = 820
     FPS: int = 60
-    WINDOW_TITLE: str = "Simulation Multi-Agents (Boids & DTN)"
+    WINDOW_TITLE: str = "Multi-Agent Simulation (Boids & DTN)"
 
-    # Population
     NUM_AGENTS: int = 50
     AGENT_RADIUS: float = 6.0
     TRAIL_LENGTH: int = 0
 
-    # Cinématique
     MAX_SPEED: float = 3.2
     MIN_SPEED: float = 1.6
     MAX_FORCE: float = 0.14
 
-    # Rayons Boids
     PERCEPTION_RADIUS: float = 68.0
     SEPARATION_RADIUS: float = 28.0
     OBSTACLE_DETECTION_MARGIN: float = 50.0
     WALL_MARGIN: float = 55.0
 
-    # Poids Boids
     WEIGHT_SEPARATION: float = 2.10
     WEIGHT_ALIGNMENT: float = 1.05
     WEIGHT_COHESION: float = 0.85
@@ -51,16 +40,13 @@ class SimConfig:
     WEIGHT_BOUNDARY: float = 2.50
     WEIGHT_WANDER: float = 0.20
 
-    # Réseau DTN
     COMM_RADIUS: float = 80.0
     BANDWIDTH_RATE: float = 0.035
     PACKET_SPAWN_INTERVAL: int = 5
     REQUIRE_LINE_OF_SIGHT: bool = True
 
-    # Grille spatiale
     GRID_CELL_SIZE: int = 80
 
-    # Palette sobre (fond clair, gris, bleu et rouge uniquement)
     BG_COLOR: Tuple[int, int, int] = (242, 242, 242)
     GRID_LINE_COLOR: Tuple[int, int, int] = (222, 222, 222)
     HUD_BG_COLOR: Tuple[int, int, int] = (228, 228, 228)
@@ -87,7 +73,6 @@ class SimConfig:
     )
 
     def reload(self, json_path: Path = CONFIG_FILE_PATH) -> bool:
-        """Recharge les paramètres depuis le fichier JSON s'il existe."""
         if not json_path.exists():
             return False
         try:
@@ -149,32 +134,31 @@ class SimConfig:
 
             col = data.get("colors", {})
             if "background" in col:
-                self.BG_COLOR = tuple(col["background"])  # type: ignore
+                self.BG_COLOR = tuple(col["background"])
             if "grid_line" in col:
-                self.GRID_LINE_COLOR = tuple(col["grid_line"])  # type: ignore
+                self.GRID_LINE_COLOR = tuple(col["grid_line"])
             if "hud_background" in col:
-                self.HUD_BG_COLOR = tuple(col["hud_background"])  # type: ignore
+                self.HUD_BG_COLOR = tuple(col["hud_background"])
             if "hud_border" in col:
-                self.HUD_BORDER_COLOR = tuple(col["hud_border"])  # type: ignore
+                self.HUD_BORDER_COLOR = tuple(col["hud_border"])
             if "blue_node" in col:
-                self.COLOR_BLUE_NODE = tuple(col["blue_node"])  # type: ignore
+                self.COLOR_BLUE_NODE = tuple(col["blue_node"])
             if "sync_node" in col:
-                self.COLOR_SYNC_NODE = tuple(col["sync_node"])  # type: ignore
+                self.COLOR_SYNC_NODE = tuple(col["sync_node"])
             if "red_node" in col:
-                self.COLOR_RED_NODE = tuple(col["red_node"])  # type: ignore
+                self.COLOR_RED_NODE = tuple(col["red_node"])
             if "obstacle_fill" in col:
-                self.COLOR_OBSTACLE_FILL = tuple(col["obstacle_fill"])  # type: ignore
+                self.COLOR_OBSTACLE_FILL = tuple(col["obstacle_fill"])
             if "obstacle_ring" in col:
-                self.COLOR_OBSTACLE_RING = tuple(col["obstacle_ring"])  # type: ignore
+                self.COLOR_OBSTACLE_RING = tuple(col["obstacle_ring"])
             if "accent" in col:
-                self.COLOR_ACCENT = tuple(col["accent"])  # type: ignore
+                self.COLOR_ACCENT = tuple(col["accent"])
 
             if "initial_obstacles" in data:
                 self.INITIAL_OBSTACLES = data["initial_obstacles"]
 
             return True
-        except Exception as exc:
-            print(f"[Avertissement] Erreur de lecture dans config.json : {exc}")
+        except Exception:
             return False
 
 

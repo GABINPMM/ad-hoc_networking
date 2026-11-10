@@ -1,8 +1,4 @@
-"""
-Agent robotique autonome : Cinématique Boids (Séparation, Alignement, Cohésion),
-évitement d'obstacles et rendu graphique sobre.
-"""
-
+# Autonomous swarm agent implementation
 from __future__ import annotations
 
 import math
@@ -17,11 +13,6 @@ from models import NodeState, Obstacle
 
 
 class SwarmAgent:
-    """
-    Robot mobile autonome gouverné par les lois de Reynolds et équipé
-    d'un émetteur-récepteur DTN (Disruption-Tolerant Network).
-    """
-
     def __init__(
         self,
         agent_id: int,
@@ -52,10 +43,6 @@ class SwarmAgent:
 
         self.last_obstacle_force: pygame.math.Vector2 = pygame.math.Vector2(0, 0)
 
-    # ------------------------------------------------------------------------
-    # LOIS DE COMPORTEMENT D'ESSAIM (BOIDS)
-    # ------------------------------------------------------------------------
-
     @staticmethod
     def _limit_vector(
         vec: pygame.math.Vector2, max_magnitude: float
@@ -75,12 +62,6 @@ class SwarmAgent:
     def compute_flocking(
         self, neighbors: List[SwarmAgent]
     ) -> Tuple[pygame.math.Vector2, pygame.math.Vector2, pygame.math.Vector2]:
-        """
-        Calcule les trois forces fondamentales de la robotique en essaim :
-        1. Séparation : Évite les collisions avec les voisins proches
-        2. Alignement : Aligne la vitesse sur la direction moyenne locale
-        3. Cohésion   : Dirige l'agent vers le barycentre des voisins
-        """
         sep_accum = pygame.math.Vector2(0.0, 0.0)
         ali_accum = pygame.math.Vector2(0.0, 0.0)
         coh_accum = pygame.math.Vector2(0.0, 0.0)
@@ -126,7 +107,6 @@ class SwarmAgent:
     def compute_obstacle_avoidance(
         self, obstacles: List[Obstacle]
     ) -> pygame.math.Vector2:
-        """Évitement dynamique des obstacles solides."""
         avoid_force = pygame.math.Vector2(0.0, 0.0)
         heading = (
             self.velocity.normalize()
@@ -181,7 +161,6 @@ class SwarmAgent:
         return self.last_obstacle_force
 
     def compute_boundary_containment(self) -> pygame.math.Vector2:
-        """Force de rappel près des bordures de l'arène."""
         desired = pygame.math.Vector2(0.0, 0.0)
         m = max(10.0, CONFIG.WALL_MARGIN)
         w = CONFIG.WORLD_WIDTH
@@ -216,10 +195,6 @@ class SwarmAgent:
         wander_force = circle_center + displacement
         return self._limit_vector(wander_force, CONFIG.MAX_FORCE * 0.5)
 
-    # ------------------------------------------------------------------------
-    # INTÉGRATION PHYSIQUE
-    # ------------------------------------------------------------------------
-
     def update_kinematics(
         self,
         neighbors: List[SwarmAgent],
@@ -253,7 +228,6 @@ class SwarmAgent:
 
         self.position += self.velocity
 
-        # Résolution stricte de non-pénétration des obstacles
         for obstacle in obstacles:
             diff = self.position - obstacle.position
             dist = diff.length()
@@ -284,15 +258,10 @@ class SwarmAgent:
             self.position.y = CONFIG.WORLD_HEIGHT - pad
             self.velocity.y = -abs(self.velocity.y)
 
-    # ------------------------------------------------------------------------
-    # RENDU GRAPHIQUE SOBRE & SIMPLE
-    # ------------------------------------------------------------------------
-
     def get_primary_color(self) -> Tuple[int, int, int]:
         if self.state == NodeState.INFECTED:
             return CONFIG.COLOR_RED_NODE
         if self.state == NodeState.SYNCING:
-            # Transition directe du Bleu au Rouge selon le téléchargement
             t = max(0.0, min(1.0, self.payload_progress))
             r = int(
                 CONFIG.COLOR_BLUE_NODE[0] * (1 - t) + CONFIG.COLOR_RED_NODE[0] * t
@@ -315,13 +284,11 @@ class SwarmAgent:
         cx, cy = int(self.position.x), int(self.position.y)
         color = self.get_primary_color()
 
-        # 1. Rayon de communication (optionnel avec touche G)
         if show_comm_radius:
             pygame.draw.circle(
                 surface, (180, 180, 180), (cx, cy), int(CONFIG.COMM_RADIUS), 1
             )
 
-        # 2. Forme triangulaire simple orientée dans le sens du déplacement
         heading_angle = math.atan2(self.velocity.y, self.velocity.x)
         r = CONFIG.AGENT_RADIUS * 1.4
 
@@ -342,13 +309,11 @@ class SwarmAgent:
         pygame.draw.polygon(surface, color, pts)
         pygame.draw.polygon(surface, (30, 30, 30), pts, 1)
 
-        # 3. Cercle fin autour du Patient Zéro
         if self.is_patient_zero:
             pygame.draw.circle(
                 surface, (30, 30, 30), (cx, cy), int(CONFIG.AGENT_RADIUS * 2.0), 1
             )
 
-        # 4. Petit cercle en pointillé / arc simple pendant le téléchargement
         if 0.0 < self.payload_progress < 1.0:
             rect = pygame.Rect(cx - 10, cy - 10, 20, 20)
             pygame.draw.arc(
@@ -360,7 +325,6 @@ class SwarmAgent:
                 2,
             )
 
-        # 5. Vecteurs de vitesse et d'évitement (optionnel avec touche V)
         if show_vectors:
             vel_end = self.position + self.velocity * 6.5
             pygame.draw.line(

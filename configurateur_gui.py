@@ -1,7 +1,4 @@
-"""
-Interface Graphique Simple (Tkinter) de Configuration & Sélection de Scénarios.
-"""
-
+# GUI scenario and configuration manager
 from __future__ import annotations
 
 import json
@@ -17,8 +14,8 @@ CONFIG_PATH = Path(__file__).parent / "config.json"
 MAIN_SCRIPT = Path(__file__).parent / "main.py"
 
 SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
-    "1. Standard Équilibré (Défaut)": {
-        "description": "Équilibre classique entre cohésion d'essaim, évitement d'obstacles et portée radio DTN moyenne.",
+    "1. Balanced Swarm (Default)": {
+        "description": "Standard balance between flocking cohesion, obstacle avoidance, and medium radio range.",
         "swarm": {"num_agents": 50, "max_speed": 3.2, "min_speed": 1.6, "max_force": 0.14},
         "flocking_radii": {"perception_radius": 68.0, "separation_radius": 28.0},
         "weights": {
@@ -34,8 +31,8 @@ SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
             "require_line_of_sight": True,
         },
     },
-    "2. Essaim Très Coordonné (Banc Compact)": {
-        "description": "Forte cohésion et fort alignement : les robots forment des pelotons denses.",
+    "2. High-Cohesion Swarm (Compact Flock)": {
+        "description": "High cohesion and strong alignment: agents move in tight, dense clusters.",
         "swarm": {"num_agents": 50, "max_speed": 3.4, "min_speed": 1.8, "max_force": 0.15},
         "flocking_radii": {"perception_radius": 90.0, "separation_radius": 24.0},
         "weights": {
@@ -51,8 +48,8 @@ SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
             "require_line_of_sight": True,
         },
     },
-    "3. Exploration Dispersée (Gaz d'Agents)": {
-        "description": "Forte séparation et mouvement aléatoire élevé : exploration individuelle uniforme.",
+    "3. Dispersed Exploration (Random Gas)": {
+        "description": "High separation and stochastic exploration: agents cover the entire arena uniformly.",
         "swarm": {"num_agents": 50, "max_speed": 3.6, "min_speed": 2.0, "max_force": 0.15},
         "flocking_radii": {"perception_radius": 60.0, "separation_radius": 42.0},
         "weights": {
@@ -68,8 +65,8 @@ SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
             "require_line_of_sight": True,
         },
     },
-    "4. DTN Courte Portée (Store-Carry-Forward Pur)": {
-        "description": "Rayon radio réduit (45 px) : les robots doivent transporter physiquement la donnée.",
+    "4. Short-Range DTN (Store-Carry-Forward)": {
+        "description": "Reduced radio radius (45 px): agents physically transport data across disconnected gaps.",
         "swarm": {"num_agents": 50, "max_speed": 3.4, "min_speed": 1.8, "max_force": 0.14},
         "flocking_radii": {"perception_radius": 68.0, "separation_radius": 28.0},
         "weights": {
@@ -85,8 +82,8 @@ SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
             "require_line_of_sight": True,
         },
     },
-    "5. Bande Passante Limitée (Gros Fichier)": {
-        "description": "Débit lent (0.008) : plusieurs croisements sont nécessaires pour télécharger 100 %.",
+    "5. Limited Bandwidth (Large File)": {
+        "description": "Slow transfer rate (0.008): multiple peer encounters are required to download 100%.",
         "swarm": {"num_agents": 50, "max_speed": 3.2, "min_speed": 1.6, "max_force": 0.14},
         "flocking_radii": {"perception_radius": 68.0, "separation_radius": 28.0},
         "weights": {
@@ -108,7 +105,7 @@ SCENARIO_PRESETS: Dict[str, Dict[str, Any]] = {
 class ConfiguratorApp:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("Configuration Simulation Boids & DTN")
+        self.root.title("Boids & DTN Simulation Settings")
         self.root.geometry("620x660")
 
         self.current_data: Dict[str, Any] = self._load_json()
@@ -132,13 +129,12 @@ class ConfiguratorApp:
 
         ttk.Label(
             main_frame,
-            text="Paramètres de la Simulation (config.json)",
+            text="Simulation Parameters (config.json)",
             font=("Segoe UI", 12, "bold"),
         ).pack(anchor=tk.W, pady=(0, 8))
 
-        # 1. Scénarios Prédéfinis
         preset_frame = ttk.LabelFrame(
-            main_frame, text=" Scénarios Prédéfinis ", padding=8
+            main_frame, text=" Predefined Scenarios ", padding=8
         )
         preset_frame.pack(fill=tk.X, pady=4)
 
@@ -159,55 +155,51 @@ class ConfiguratorApp:
         )
         self.preset_desc_lbl.pack(anchor=tk.W)
 
-        # 2. Population & Cinématique
         swarm_frame = ttk.LabelFrame(
-            main_frame, text=" 1. Population & Cinématique ", padding=8
+            main_frame, text=" 1. Swarm Population & Kinematics ", padding=8
         )
         swarm_frame.pack(fill=tk.X, pady=4)
-        self._add_slider(swarm_frame, "num_agents", "Nombre d'agents :", 10, 150, 1, "{:.0f}")
-        self._add_slider(swarm_frame, "max_speed", "Vitesse maximale :", 1.0, 6.0, 0.1, "{:.1f}")
-        self._add_slider(swarm_frame, "perception_radius", "Rayon de perception (px) :", 30, 150, 1, "{:.0f}")
-        self._add_slider(swarm_frame, "separation_radius", "Rayon de séparation (px) :", 12, 70, 1, "{:.0f}")
+        self._add_slider(swarm_frame, "num_agents", "Number of agents:", 10, 150, 1, "{:.0f}")
+        self._add_slider(swarm_frame, "max_speed", "Maximum speed:", 1.0, 6.0, 0.1, "{:.1f}")
+        self._add_slider(swarm_frame, "perception_radius", "Perception radius (px):", 30, 150, 1, "{:.0f}")
+        self._add_slider(swarm_frame, "separation_radius", "Separation radius (px):", 12, 70, 1, "{:.0f}")
 
-        # 3. Poids Boids
         weights_frame = ttk.LabelFrame(
-            main_frame, text=" 2. Règles d'Essaim (Poids Boids) ", padding=8
+            main_frame, text=" 2. Flocking Weights (Reynolds Rules) ", padding=8
         )
         weights_frame.pack(fill=tk.X, pady=4)
-        self._add_slider(weights_frame, "separation", "Séparation :", 0.0, 5.0, 0.05, "{:.2f}")
-        self._add_slider(weights_frame, "alignment", "Alignement :", 0.0, 4.0, 0.05, "{:.2f}")
-        self._add_slider(weights_frame, "cohesion", "Cohésion :", 0.0, 4.0, 0.05, "{:.2f}")
-        self._add_slider(weights_frame, "obstacle_avoidance", "Évitement d'obstacles :", 0.5, 6.0, 0.1, "{:.2f}")
-        self._add_slider(weights_frame, "wander", "Exploration aléatoire :", 0.0, 2.0, 0.05, "{:.2f}")
+        self._add_slider(weights_frame, "separation", "Separation weight:", 0.0, 5.0, 0.05, "{:.2f}")
+        self._add_slider(weights_frame, "alignment", "Alignment weight:", 0.0, 4.0, 0.05, "{:.2f}")
+        self._add_slider(weights_frame, "cohesion", "Cohesion weight:", 0.0, 4.0, 0.05, "{:.2f}")
+        self._add_slider(weights_frame, "obstacle_avoidance", "Obstacle avoidance weight:", 0.5, 6.0, 0.1, "{:.2f}")
+        self._add_slider(weights_frame, "wander", "Wander weight:", 0.0, 2.0, 0.05, "{:.2f}")
 
-        # 4. Réseau DTN
         dtn_frame = ttk.LabelFrame(
-            main_frame, text=" 3. Réseau Ad-Hoc (DTN) ", padding=8
+            main_frame, text=" 3. Ad-Hoc Network (DTN) ", padding=8
         )
         dtn_frame.pack(fill=tk.X, pady=4)
-        self._add_slider(dtn_frame, "comm_radius", "Portée radio (px) :", 25, 160, 1, "{:.0f}")
-        self._add_slider(dtn_frame, "bandwidth_rate", "Vitesse de téléchargement :", 0.002, 0.10, 0.002, "{:.3f}")
+        self._add_slider(dtn_frame, "comm_radius", "Radio range (px):", 25, 160, 1, "{:.0f}")
+        self._add_slider(dtn_frame, "bandwidth_rate", "Download rate:", 0.002, 0.10, 0.002, "{:.3f}")
 
         self.los_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(
             dtn_frame,
-            text="Les obstacles bloquent les ondes radio (Ligne de visée)",
+            text="Solid obstacles block radio waves (Line of Sight)",
             variable=self.los_var,
         ).pack(anchor=tk.W, pady=(4, 0))
 
-        # 5. Boutons
         btn_frame = ttk.Frame(main_frame)
         btn_frame.pack(fill=tk.X, pady=(12, 0))
 
         ttk.Button(
             btn_frame,
-            text="Enregistrer config.json (Touche [C] en jeu)",
+            text="Save to config.json (Press [C] in simulation)",
             command=self.save_config,
         ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 4))
 
         ttk.Button(
             btn_frame,
-            text="Enregistrer & Lancer la Simulation",
+            text="Save & Launch Simulation",
             command=self.save_and_launch,
         ).pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(4, 0))
 
@@ -324,7 +316,7 @@ class ConfiguratorApp:
                 json.dump(self.current_data, f, indent=4)
             return True
         except Exception as exc:
-            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde :\n{exc}")
+            messagebox.showerror("Error", f"Failed to save config.json:\n{exc}")
             return False
 
     def save_and_launch(self) -> None:

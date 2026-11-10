@@ -1,20 +1,4 @@
-"""
-Simulation Multi-Agents : Robotique en Essaim (Boids) & Réseau DTN
-==================================================================
-Version Monobloc (Un seul fichier complet pour annexe de rapport académique)
-Style graphique sobre et minimaliste (fond clair, gris, bleu et rouge).
-
-Contrôles :
------------
-- [ESPACE]          : Pause / Reprendre la simulation
-- [R]               : Réinitialiser la simulation (nouveau Patient Zéro)
-- [G]               : Afficher / Masquer la grille spatiale et les rayons radio
-- [V]               : Afficher / Masquer les vecteurs de vitesse et d'évitement
-- [Clic Gauche]     : Infecter l'agent le plus proche
-- [MAJ+Clic Gauche] : Ajouter un obstacle solide sous le curseur
-- [Clic Droit]      : Supprimer un obstacle sous le curseur
-"""
-
+# Single-file standalone simulation
 from __future__ import annotations
 
 import math
@@ -28,10 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import pygame
 
 
-# ============================================================================
-# 1. CONFIGURATION
-# ============================================================================
-
+# 1. Configuration
 @dataclass(frozen=True)
 class SimConfig:
     SCREEN_WIDTH: int = 1360
@@ -40,7 +21,7 @@ class SimConfig:
     WORLD_WIDTH: int = 1040
     WORLD_HEIGHT: int = 820
     FPS: int = 60
-    WINDOW_TITLE: str = "Simulation Multi-Agents (Boids & DTN)"
+    WINDOW_TITLE: str = "Multi-Agent Simulation (Boids & DTN)"
 
     NUM_AGENTS: int = 50
     AGENT_RADIUS: float = 6.0
@@ -67,7 +48,6 @@ class SimConfig:
 
     GRID_CELL_SIZE: int = 80
 
-    # Palette sobre (fond clair, gris, bleu et rouge uniquement)
     BG_COLOR: Tuple[int, int, int] = (242, 242, 242)
     GRID_LINE_COLOR: Tuple[int, int, int] = (222, 222, 222)
     HUD_BG_COLOR: Tuple[int, int, int] = (228, 228, 228)
@@ -85,10 +65,7 @@ class SimConfig:
 CONFIG = SimConfig()
 
 
-# ============================================================================
-# 2. STRUCTURES DE DONNÉES
-# ============================================================================
-
+# 2. Data structures and models
 class NodeState(Enum):
     HEALTHY = auto()
     SYNCING = auto()
@@ -136,10 +113,7 @@ class RippleWave:
         )
 
 
-# ============================================================================
-# 3. GRILLE DE HACHAGE SPATIAL (O(N))
-# ============================================================================
-
+# 3. Spatial hash grid
 class SpatialHashGrid:
     def __init__(self, cell_size: int) -> None:
         self.cell_size: int = cell_size
@@ -179,10 +153,7 @@ class SpatialHashGrid:
         return neighbors
 
 
-# ============================================================================
-# 4. AGENT AUTONOME (BOIDS + DTN)
-# ============================================================================
-
+# 4. Swarm agent kinematics
 class SwarmAgent:
     def __init__(
         self,
@@ -507,10 +478,7 @@ class SwarmAgent:
                 )
 
 
-# ============================================================================
-# 5. CONTRÔLEUR DTN (RÉSEAU AD-HOC)
-# ============================================================================
-
+# 5. DTN network protocol
 class DTNController:
     def __init__(self) -> None:
         self.active_links: List[Tuple[SwarmAgent, SwarmAgent, bool]] = []
@@ -659,10 +627,7 @@ class DTNController:
             ripple.draw(surface)
 
 
-# ============================================================================
-# 6. TABLEAU DE BORD SOBRE (HUD)
-# ============================================================================
-
+# 6. Minimalist analytical HUD
 class DashboardHUD:
     def __init__(self) -> None:
         pygame.font.init()
@@ -757,18 +722,18 @@ class DashboardHUD:
         y = 12
 
         title_surf = self.font_title.render(
-            "TABLEAU DE BORD (DTN)", True, CONFIG.COLOR_TEXT_PRIMARY
+            "DTN DASHBOARD", True, CONFIG.COLOR_TEXT_PRIMARY
         )
         surface.blit(title_surf, (x0 + pad, y))
         y += 20
         sub_surf = self.font_small.render(
-            "Simulation Boids & Reseau Ad-Hoc", True, CONFIG.COLOR_TEXT_MUTED
+            "Swarm Robotics & Ad-Hoc Network", True, CONFIG.COLOR_TEXT_MUTED
         )
         surface.blit(sub_surf, (x0 + pad, y))
         y += 18
 
         box1 = pygame.Rect(x0 + pad, y, cw, 148)
-        self._draw_box(surface, box1, "1. PROPAGATION DES DONNEES")
+        self._draw_box(surface, box1, "1. DATA PROPAGATION")
 
         prop_pct = metrics["prop_pct"]
         pct_surf = self.font_metric.render(
@@ -790,25 +755,25 @@ class DashboardHUD:
 
         rows = [
             (
-                "Agents porteurs (Rouge) :",
+                "Carrier nodes (Red)     :",
                 f"{int(metrics['infected']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_RED_NODE,
             ),
             (
-                "En telechargement       :",
+                "Syncing nodes           :",
                 f"{int(metrics['syncing']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_TEXT_PRIMARY,
             ),
             (
-                "Agents sains (Bleu)     :",
+                "Healthy nodes (Blue)    :",
                 f"{int(metrics['healthy']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_BLUE_NODE,
             ),
             (
-                "Temps de convergence    :",
+                "Consensus time          :",
                 f"{self.convergence_time:.1f} s"
                 if self.convergence_time is not None
-                else "En cours",
+                else "In progress",
                 CONFIG.COLOR_TEXT_PRIMARY,
             ),
         ]
@@ -823,16 +788,16 @@ class DashboardHUD:
         y += box1.height + 10
 
         box2 = pygame.Rect(x0 + pad, y, cw, 122)
-        self._draw_box(surface, box2, "2. CONNECTIVITE RESEAU")
+        self._draw_box(surface, box2, "2. NETWORK TOPOLOGY")
 
         topo_rows = [
             (
-                "Agents connectes        :",
+                "Connected nodes         :",
                 f"{int(metrics['connected']):02d}/{int(metrics['total']):02d} ({metrics['conn_pct']:.0f}%)",
             ),
-            ("Liens P2P actifs        :", f"{len(dtn.active_links):d}"),
-            ("Voisins moyens <k>      :", f"{metrics['avg_degree']:.2f}"),
-            ("Portee radio (rayon)    :", f"{CONFIG.COMM_RADIUS:.0f} px"),
+            ("Active P2P links        :", f"{len(dtn.active_links):d}"),
+            ("Average node degree <k> :", f"{metrics['avg_degree']:.2f}"),
+            ("Radio comm radius       :", f"{CONFIG.COMM_RADIUS:.0f} px"),
         ]
         ry = box2.y + 34
         for label, val in topo_rows:
@@ -845,7 +810,7 @@ class DashboardHUD:
         y += box2.height + 10
 
         box3 = pygame.Rect(x0 + pad, y, cw, 175)
-        self._draw_box(surface, box3, "3. COURBE DE PROPAGATION")
+        self._draw_box(surface, box3, "3. PROPAGATION CURVE")
 
         plot_rect = pygame.Rect(box3.x + 34, box3.y + 34, cw - 44, 110)
         pygame.draw.rect(surface, (255, 255, 255), plot_rect)
@@ -902,26 +867,26 @@ class DashboardHUD:
             1,
         )
         surface.blit(
-            self.font_small.render("Connectes %", True, CONFIG.COLOR_TEXT_PRIMARY),
+            self.font_small.render("Connected %", True, CONFIG.COLOR_TEXT_PRIMARY),
             (box3.x + 165, leg_y),
         )
 
         y += box3.height + 10
 
         box4 = pygame.Rect(x0 + pad, y, cw, CONFIG.SCREEN_HEIGHT - y - 12)
-        self._draw_box(surface, box4, "4. PARAMETRES & COMMANDES")
+        self._draw_box(surface, box4, "4. SETTINGS & CONTROLS")
 
         info_rows = [
-            f"Temps : {sim_time:5.1f}s | FPS : {fps:4.0f} ({'PAUSE' if paused else 'ACTIF'})",
+            f"Time : {sim_time:5.1f}s | FPS : {fps:4.0f} ({'PAUSED' if paused else 'RUNNING'})",
             f"Boids S/A/C : {CONFIG.WEIGHT_SEPARATION:.1f} / {CONFIG.WEIGHT_ALIGNMENT:.1f} / {CONFIG.WEIGHT_COHESION:.1f}",
             "----------------------------------",
-            "[ESPACE] : Pause / Reprendre",
-            "[R]      : Reinitialiser",
-            f"[G] ({'ON' if show_grid else 'OFF'}) : Grille & Rayons Radio",
-            f"[V] ({'ON' if show_vectors else 'OFF'}) : Vecteurs de Vitesse",
-            "[Clic G] : Infecter un agent",
-            "[MAJ+G]  : Ajouter un obstacle",
-            "[Clic D] : Supprimer un obstacle",
+            "[SPACE]   : Pause / Resume",
+            "[R]       : Reset swarm",
+            f"[G] ({'ON' if show_grid else 'OFF'}) : Toggle grid & radio range",
+            f"[V] ({'ON' if show_vectors else 'OFF'}) : Toggle force vectors",
+            "[L-Click] : Infect closest agent",
+            "[Shift+L] : Add obstacle",
+            "[R-Click] : Remove obstacle",
         ]
         ry = box4.y + 32
         for line_str in info_rows:
@@ -932,10 +897,7 @@ class DashboardHUD:
             ry += 17
 
 
-# ============================================================================
-# 7. MOTEUR PRINCIPAL DE LA SIMULATION
-# ============================================================================
-
+# 7. Simulation engine loop
 class SimulationEngine:
     def __init__(self) -> None:
         pygame.init()

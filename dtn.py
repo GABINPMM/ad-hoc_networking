@@ -1,8 +1,4 @@
-"""
-Contrôleur du réseau tolérant aux délais et perturbations (DTN / MANET).
-Rendu sobre des connexions et des paquets transférés.
-"""
-
+# Disruption-tolerant network protocol controller
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Set, Tuple
@@ -16,13 +12,6 @@ from spatial_grid import SpatialHashGrid
 
 
 class DTNController:
-    """
-    Implémente le protocole Store-Carry-Forward :
-    lorsqu'un agent sain (Bleu) entre dans le rayon de communication d'un
-    agent porteur (Rouge), il télécharge progressivement la charge utile
-    et devient à son tour un relais actif.
-    """
-
     def __init__(self) -> None:
         self.active_links: List[Tuple[SwarmAgent, SwarmAgent, bool]] = []
         self.packets: List[DataPacketVisual] = []
@@ -152,7 +141,6 @@ class DTNController:
     def draw(
         self, surface: pygame.Surface, agent_map: Dict[int, SwarmAgent]
     ) -> None:
-        # Lignes de connexion simples
         for node_a, node_b, is_transferring in self.active_links:
             p1 = (int(node_a.position.x), int(node_a.position.y))
             p2 = (int(node_b.position.x), int(node_b.position.y))
@@ -162,7 +150,6 @@ class DTNController:
             else:
                 pygame.draw.line(surface, (190, 190, 190), p1, p2, 1)
 
-        # Petits points pour les paquets en cours de transfert
         for pkt in self.packets:
             src = agent_map[pkt.source_id]
             dst = agent_map[pkt.target_id]

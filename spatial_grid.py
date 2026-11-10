@@ -1,7 +1,4 @@
-"""
-Grille de hachage spatial uniforme 2D (Complexité O(N) pour le voisinage).
-"""
-
+# Spatial hash grid for neighbor search
 from __future__ import annotations
 
 import math
@@ -14,11 +11,6 @@ if TYPE_CHECKING:
 
 
 class SpatialHashGrid:
-    """
-    Partitionne l'espace 2D en cellules uniformes afin d'accélérer
-    les requêtes de voisinage (Boids et découverte réseau DTN).
-    """
-
     def __init__(self, cell_size: int) -> None:
         self.cell_size: int = max(16, cell_size)
         self.cells: Dict[Tuple[int, int], List[SwarmAgent]] = {}
@@ -43,7 +35,6 @@ class SpatialHashGrid:
     def query_radius(
         self, position: pygame.math.Vector2, radius: float
     ) -> List[SwarmAgent]:
-        """Retourne tous les agents situés à une distance <= radius."""
         cx, cy = self._hash(position)
         cell_span = int(math.ceil(radius / self.cell_size))
         radius_sq = radius * radius
@@ -58,4 +49,3 @@ class SpatialHashGrid:
                     if (candidate.position - position).length_squared() <= radius_sq:
                         neighbors.append(candidate)
         return neighbors
-

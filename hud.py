@@ -1,8 +1,4 @@
-"""
-Tableau de bord analytique sobre (HUD) affichant les métriques temps réel,
-le pourcentage de propagation, le nombre d'agents connectés et la courbe S.
-"""
-
+# Heads-up display and analytical dashboard
 from __future__ import annotations
 
 from collections import deque
@@ -17,8 +13,6 @@ from models import NodeState
 
 
 class DashboardHUD:
-    """Panneau latéral sobre et lisible pour rapport académique."""
-
     def __init__(self) -> None:
         pygame.font.init()
         self.font_title = pygame.font.SysFont("consolas", 16, bold=True)
@@ -122,7 +116,7 @@ class DashboardHUD:
         y = 12
 
         title_surf = self.font_title.render(
-            "TABLEAU DE BORD (DTN)", True, CONFIG.COLOR_TEXT_PRIMARY
+            "DTN DASHBOARD", True, CONFIG.COLOR_TEXT_PRIMARY
         )
         surface.blit(title_surf, (x0 + pad, y))
         y += 20
@@ -133,18 +127,15 @@ class DashboardHUD:
             )
         else:
             sub_surf = self.font_small.render(
-                "Simulation Boids & Reseau Ad-Hoc",
+                "Swarm Robotics & Ad-Hoc Network",
                 True,
                 CONFIG.COLOR_TEXT_MUTED,
             )
         surface.blit(sub_surf, (x0 + pad, y))
         y += 18
 
-        # --------------------------------------------------------------------
-        # BLOC 1 : PROPAGATION DES DONNÉES
-        # --------------------------------------------------------------------
         box1 = pygame.Rect(x0 + pad, y, cw, 148)
-        self._draw_box(surface, box1, "1. PROPAGATION DES DONNEES")
+        self._draw_box(surface, box1, "1. DATA PROPAGATION")
 
         prop_pct = metrics["prop_pct"]
         pct_surf = self.font_metric.render(
@@ -167,25 +158,25 @@ class DashboardHUD:
 
         rows = [
             (
-                "Agents porteurs (Rouge) :",
+                "Carrier nodes (Red)     :",
                 f"{int(metrics['infected']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_RED_NODE,
             ),
             (
-                "En telechargement       :",
+                "Syncing nodes           :",
                 f"{int(metrics['syncing']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_TEXT_PRIMARY,
             ),
             (
-                "Agents sains (Bleu)     :",
+                "Healthy nodes (Blue)    :",
                 f"{int(metrics['healthy']):02d}/{int(metrics['total']):02d}",
                 CONFIG.COLOR_BLUE_NODE,
             ),
             (
-                "Temps de convergence    :",
+                "Consensus time          :",
                 f"{self.convergence_time:.1f} s"
                 if self.convergence_time is not None
-                else "En cours",
+                else "In progress",
                 CONFIG.COLOR_TEXT_PRIMARY,
             ),
         ]
@@ -199,20 +190,17 @@ class DashboardHUD:
 
         y += box1.height + 10
 
-        # --------------------------------------------------------------------
-        # BLOC 2 : CONNECTIVITÉ RÉSEAU
-        # --------------------------------------------------------------------
         box2 = pygame.Rect(x0 + pad, y, cw, 122)
-        self._draw_box(surface, box2, "2. CONNECTIVITE RESEAU")
+        self._draw_box(surface, box2, "2. NETWORK TOPOLOGY")
 
         topo_rows = [
             (
-                "Agents connectes        :",
+                "Connected nodes         :",
                 f"{int(metrics['connected']):02d}/{int(metrics['total']):02d} ({metrics['conn_pct']:.0f}%)",
             ),
-            ("Liens P2P actifs        :", f"{len(dtn.active_links):d}"),
-            ("Voisins moyens <k>      :", f"{metrics['avg_degree']:.2f}"),
-            ("Portee radio (rayon)    :", f"{CONFIG.COMM_RADIUS:.0f} px"),
+            ("Active P2P links        :", f"{len(dtn.active_links):d}"),
+            ("Average node degree <k> :", f"{metrics['avg_degree']:.2f}"),
+            ("Radio comm radius       :", f"{CONFIG.COMM_RADIUS:.0f} px"),
         ]
         ry = box2.y + 34
         for label, val in topo_rows:
@@ -224,11 +212,8 @@ class DashboardHUD:
 
         y += box2.height + 10
 
-        # --------------------------------------------------------------------
-        # BLOC 3 : COURBE D'ÉVOLUTION TEMPS RÉEL
-        # --------------------------------------------------------------------
         box3 = pygame.Rect(x0 + pad, y, cw, 175)
-        self._draw_box(surface, box3, "3. COURBE DE PROPAGATION")
+        self._draw_box(surface, box3, "3. PROPAGATION CURVE")
 
         plot_rect = pygame.Rect(box3.x + 34, box3.y + 34, cw - 44, 110)
         pygame.draw.rect(surface, (255, 255, 255), plot_rect)
@@ -285,31 +270,28 @@ class DashboardHUD:
             1,
         )
         surface.blit(
-            self.font_small.render("Connectes %", True, CONFIG.COLOR_TEXT_PRIMARY),
+            self.font_small.render("Connected %", True, CONFIG.COLOR_TEXT_PRIMARY),
             (box3.x + 165, leg_y),
         )
 
         y += box3.height + 10
 
-        # --------------------------------------------------------------------
-        # BLOC 4 : PARAMÈTRES & COMMANDES
-        # --------------------------------------------------------------------
         box4 = pygame.Rect(x0 + pad, y, cw, CONFIG.SCREEN_HEIGHT - y - 12)
-        self._draw_box(surface, box4, "4. PARAMETRES & COMMANDES")
+        self._draw_box(surface, box4, "4. SETTINGS & CONTROLS")
 
         info_rows = [
-            f"Temps : {sim_time:5.1f}s | FPS : {fps:4.0f} ({'PAUSE' if paused else 'ACTIF'})",
+            f"Time : {sim_time:5.1f}s | FPS : {fps:4.0f} ({'PAUSED' if paused else 'RUNNING'})",
             f"Boids S/A/C : {CONFIG.WEIGHT_SEPARATION:.1f} / {CONFIG.WEIGHT_ALIGNMENT:.1f} / {CONFIG.WEIGHT_COHESION:.1f}",
             "----------------------------------",
-            "[ESPACE] : Pause / Reprendre",
-            "[R]      : Reinitialiser",
-            "[C]      : Recharger config.json",
-            "[S]/[E]  : Capture PNG / Export CSV",
-            f"[G] ({'ON' if show_grid else 'OFF'}) : Grille & Rayons Radio",
-            f"[V] ({'ON' if show_vectors else 'OFF'}) : Vecteurs de Vitesse",
-            "[Clic G] : Infecter un agent",
-            "[MAJ+G]  : Ajouter un obstacle",
-            "[Clic D] : Supprimer un obstacle",
+            "[SPACE]   : Pause / Resume",
+            "[R]       : Reset swarm",
+            "[C]       : Reload config.json",
+            "[S] / [E] : Screenshot / Export CSV",
+            f"[G] ({'ON' if show_grid else 'OFF'}) : Toggle grid & radio range",
+            f"[V] ({'ON' if show_vectors else 'OFF'}) : Toggle force vectors",
+            "[L-Click] : Infect closest agent",
+            "[Shift+L] : Add obstacle",
+            "[R-Click] : Remove obstacle",
         ]
         ry = box4.y + 32
         for line_str in info_rows:
